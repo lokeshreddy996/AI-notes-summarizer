@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Notes Summarizer</title>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --success: #4cc9f0;
+      --border-radius: 12px;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transform: translateY(0);
+      transition: var(--transition);
+    }
+    
+    .container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    header {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .content {
+      padding: 2rem;
+    }
+    
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--gray);
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid #e9ecef;
+      border-radius: var(--border-radius);
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 200px;
+      transition: var(--transition);
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+    
+    button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    button:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    #output {
+      background: var(--light);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--primary);
+      min-height: 120px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: var(--transition);
+    }
+    
+    #output.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    #output.loading {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    .output-placeholder {
+      color: var(--gray);
+      font-style: italic;
+    }
+    
+    .word-count {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .content {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+        </svg>
+        AI Notes Summarizer
+      </h1>
+    </header>
+    
+    <div class="content">
+      <div class="input-group">
+        <label for="inputText">Your Notes</label>
+        <textarea id="inputText" placeholder="Paste your lecture notes, meeting minutes, or any lengthy text here..."></textarea>
+        <div class="word-count">
+          <span id="charCount">0 characters</span>
+          <span id="wordCount">0 words</span>
+        </div>
+      </div>
+      
+      <button onclick="summarizeText()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 10 20 15 15 20"></polyline>
+          <path d="M4 4v7a4 4 0 0 0 4 4h12"></path>
+        </svg>
+        Generate Summary
+      </button>
+      
+      <div id="output" class="output-placeholder">Your concise summary will appear here...</div>
+    </div>
+  </div>
+
+  <script>
+    // Update character and word count in real-time
+    const inputText = document.getElementById('inputText');
+    const charCount = document.getElementById('charCount');
+    const wordCount = document.getElementById('wordCount');
+    
+    inputText.addEventListener('input', function() {
+      const text = this.value;
+      charCount.textContent = `${text.length} characters`;
+      wordCount.textContent = `${text.trim() ? text.trim().split(/\s+/).length : 0} words`;
+    });
+    
+    async function summarizeText() {
+      const text = inputText.value.trim();
+      const outputDiv = document.getElementById('output');
+      
+      if (!text) {
+        outputDiv.textContent = "Please enter some text to summarize.";
+        outputDiv.classList.add('show');
+        return;
+      }
+      
+      // Show loading state
+      outputDiv.textContent = "Analyzing content and generating summary...";
+      outputDiv.classList.add('loading');
+      outputDiv.classList.add('show');
+      outputDiv.classList.remove('output-placeholder');
+      
+      try {
+        // Simulate API delay (replace with actual API call)
+        const summary = await mockSummarizeAPI(text);
+        
+        // Display results
+        outputDiv.innerHTML = `
+          <h3 style="margin-bottom: 0.5rem; color: var(--primary)">Summary</h3>
+          <p style="margin-bottom: 1rem;">${summary}</p>
+          <div style="font-size: 0.9rem; color: var(--gray);">
+            <strong>Reduction:</strong> ${Math.round(100 - (summary.length / text.length * 100))}% shorter
+          </div>
+        `;
+        
+        outputDiv.classList.remove('loading');
+      } catch (error) {
+        outputDiv.textContent = "Error generating summary. Please try again.";
+        outputDiv.classList.remove('loading');
+        console.error(error);
+      }
+    }
+    
+    // Mock API function (replace with real API call)
+    function mockSummarizeAPI(text) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          // Simple summarization logic for demo
+          const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+          const importantSentences = sentences
+            .filter(s => s.length > 20) // Filter very short sentences
+            .slice(0, Math.ceil(sentences.length * 0.3)); // Take top 30%
+          
+          resolve(importantSentences.join(' ') || "The summary couldn't be generated. The input may be too short or complex.");
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

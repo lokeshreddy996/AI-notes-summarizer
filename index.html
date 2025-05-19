@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Notes Summarizer</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    
+    h1 {
+      color: #4a6baf;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      resize: vertical;
+      min-height: 200px;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #4a6baf;
+    }
+    
+    button {
+      background-color: #4a6baf;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: block;
+      margin: 0 auto 30px;
+    }
+    
+    button:hover {
+      background-color: #3a5a9f;
+    }
+    
+    #output {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      min-height: 100px;
+    }
+    
+    .loading {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧠 AI Notes Summarizer</h1>
+  
+  <textarea id="inputText" rows="10" placeholder="Paste your notes here..."></textarea>
+  <button onclick="summarizeText()">Summarize</button>
+  
+  <div id="output">Your summary will appear here...</div>
+
+  <script>
+    async function summarizeText() {
+      const inputText = document.getElementById('inputText').value.trim();
+      const outputDiv = document.getElementById('output');
+      
+      if (!inputText) {
+        outputDiv.textContent = 'Please enter some text to summarize.';
+        return;
+      }
+      
+      outputDiv.innerHTML = '<div class="loading">Generating summary... This may take a moment.</div>';
+      
+      try {
+        // In a real implementation, you would call an actual API here
+        // This is a mock implementation that simulates an API call
+        const summary = await mockSummarizeAPI(inputText);
+        outputDiv.textContent = summary;
+      } catch (error) {
+        outputDiv.textContent = 'Error generating summary. Please try again.';
+        console.error('Error:', error);
+      }
+    }
+    
+    // Mock API function - in a real app, replace this with an actual API call
+    function mockSummarizeAPI(text) {
+      return new Promise((resolve) => {
+        // Simulate API delay
+        setTimeout(() => {
+          // Simple mock summarization logic
+          const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+          const summaryLength = Math.max(1, Math.floor(sentences.length / 3));
+          const summary = sentences.slice(0, summaryLength).join(' ');
+          
+          resolve(summary || "The summary couldn't be generated. The input may be too short.");
+        }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
